@@ -1,0 +1,5 @@
+# Optional report rendering dependency.
+# Install only when server-side PDF export is required:
+#   pip install -r backend/requirements-optional.txt
+#   python -m playwright install chromium
+playwright>=1.40,<2

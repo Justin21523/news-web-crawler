@@ -36,10 +36,14 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
+import shutil
 import sys
+from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent / "backend"))
 
 from pipeline.db import NewsDB
 from pipeline.schema import RawArticle, CleanArticle, EnrichedArticle
@@ -56,11 +60,18 @@ from analysis.classification import NewsClassifier, SentimentAnalyzer
 from analysis.summarization import Summarizer
 from analysis.time_series import TimeSeriesAnalyzer
 from utils.resource_manager import ResourceManager
+from app.services.entity_extraction import EntityExtractionService
+from app.services.database import Database
 
-DB_PATH = "/mnt/c/data/information-retrieval/news.db"
-RAW_DIR = "/mnt/c/data/information-retrieval/raw"
-PROCESSED_DIR = "/mnt/c/data/information-retrieval/processed"
-MODELS_DIR = "/mnt/c/data/information-retrieval/models"
+DATA_DIR = os.getenv("NEWS_DATA_DIR", "data")
+DB_PATH = os.getenv("NEWS_DB_PATH", f"{DATA_DIR}/news.db")
+RAW_DIR = os.getenv("NEWS_RAW_DIR", f"{DATA_DIR}/raw")
+PROCESSED_DIR = os.getenv("NEWS_PROCESSED_DIR", f"{DATA_DIR}/processed")
+MODELS_DIR = os.getenv("NEWS_MODELS_DIR", f"{DATA_DIR}/models")
+FEATURES_DIR = os.getenv("NEWS_FEATURES_DIR", f"{DATA_DIR}/features")
+REPORTS_DIR = os.getenv("NEWS_REPORTS_DIR", f"{DATA_DIR}/reports")
+EXPORTS_DIR = os.getenv("NEWS_EXPORTS_DIR", f"{DATA_DIR}/exports")
+SAMPLE_DATASET = Path(__file__).parent / "sample_data" / "news_sample.jsonl"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -95,6 +106,135 @@ def cmd_ingest(args):
         print(f"  {k}: {v}")
 
 
+def ensure_data_dirs(data_dir: str | Path = DATA_DIR) -> dict[str, Path]:
+    """建立 demo pipeline 需要的資料目錄。"""
+    root = Path(data_dir)
+    dirs = {
+        "raw": Path(RAW_DIR),
+        "processed": Path(PROCESSED_DIR),
+        "features": Path(FEATURES_DIR),
+        "models": Path(MODELS_DIR),
+        "reports": Path(REPORTS_DIR),
+        "exports": Path(EXPORTS_DIR),
+    }
+    for path in [root, *dirs.values()]:
+        path.mkdir(parents=True, exist_ok=True)
+    return dirs
+
+
+def _reset_sqlite(db_path: str | Path) -> None:
+    base = Path(db_path)
+    for suffix in ("", "-wal", "-shm"):
+        path = Path(f"{base}{suffix}")
+        if path.exists():
+            path.unlink()
+
+
+def _write_demo_reports(db_path: str | Path, reports_dir: str | Path = REPORTS_DIR) -> None:
+    """輸出前端可直接讀取的輕量 demo 分析報表。"""
+    db = NewsDB(db_path)
+    db.connect()
+    out_dir = Path(reports_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    source_rows = db._conn.execute(
+        "SELECT COALESCE(source, 'unknown') AS source, COUNT(*) AS count FROM articles GROUP BY source ORDER BY count DESC"
+    ).fetchall()
+    category_rows = db._conn.execute(
+        "SELECT COALESCE(NULLIF(category_name, ''), COALESCE(category, 'unknown')) AS category, COUNT(*) AS count "
+        "FROM articles GROUP BY category ORDER BY count DESC"
+    ).fetchall()
+    date_rows = db._conn.execute(
+        "SELECT substr(publish_date, 1, 10) AS date, COUNT(*) AS count FROM articles "
+        "WHERE publish_date IS NOT NULL AND trim(publish_date) != '' GROUP BY date ORDER BY date"
+    ).fetchall()
+    length_row = db._conn.execute(
+        "SELECT MIN(char_count), AVG(char_count), MAX(char_count) FROM articles"
+    ).fetchone()
+    nlp_rows = db._conn.execute("SELECT keywords, tokens FROM nlp_outputs").fetchall()
+
+    keyword_counts: Counter[str] = Counter()
+    for row in nlp_rows:
+        try:
+            keywords = json.loads(row["keywords"] or "[]")
+            tokens = json.loads(row["tokens"] or "[]")
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if keywords:
+            for term, score in keywords:
+                keyword_counts[str(term)] += float(score or 1)
+        else:
+            keyword_counts.update(str(token) for token in tokens if len(str(token)) > 1)
+
+    by_month: dict[str, int] = defaultdict(int)
+    for row in date_rows:
+        if row["date"]:
+            by_month[str(row["date"])[:7]] += int(row["count"])
+
+    text_mining = {
+        "summary": "Demo keyword and coverage report generated from sample news data.",
+        "top_keywords": [{"keyword": k, "score": round(v, 4)} for k, v in keyword_counts.most_common(20)],
+        "source_distribution": [dict(row) for row in source_rows],
+        "category_distribution": [dict(row) for row in category_rows],
+    }
+    time_series = {
+        "summary": "Demo article volume trend by publish date.",
+        "daily_volume": [dict(row) for row in date_rows],
+        "monthly_volume": [{"month": k, "count": v} for k, v in sorted(by_month.items())],
+    }
+    sentiment = {
+        "summary": "Rule-based sentiment is not enabled in Phase 1 demo.",
+        "distribution": [{"label": "neutral", "count": db.stats().get("total_articles", 0)}],
+    }
+    analysis_report = {
+        "summary": "Sample dataset analysis report.",
+        "sources": text_mining["source_distribution"],
+        "categories": text_mining["category_distribution"],
+        "top_keywords": text_mining["top_keywords"],
+        "daily_volume": time_series["daily_volume"],
+        "article_length": {
+            "min": int(length_row[0] or 0),
+            "avg": round(float(length_row[1] or 0), 1),
+            "max": int(length_row[2] or 0),
+        },
+    }
+
+    for filename, payload in {
+        "text_mining.json": text_mining,
+        "time_series.json": time_series,
+        "sentiment_report.json": sentiment,
+        "analysis_report.json": analysis_report,
+    }.items():
+        (out_dir / filename).write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    db.close()
+
+
+def cmd_demo(args):
+    """建立可展示的 sample news pipeline 閉環。"""
+    dirs = ensure_data_dirs()
+    db_path = args.db or DB_PATH
+    if args.reset:
+        _reset_sqlite(db_path)
+
+    sample = Path(args.sample or SAMPLE_DATASET)
+    if not sample.exists():
+        raise FileNotFoundError(f"Sample dataset not found: {sample}")
+
+    target = dirs["raw"] / sample.name
+    shutil.copyfile(sample, target)
+    logger.info("Copied sample dataset to %s", target)
+
+    cmd_ingest(argparse.Namespace(db=db_path, input_dir=str(dirs["raw"]), batch_size=200))
+    cmd_nlp(argparse.Namespace(
+        db=db_path, engine="jieba", top_k=10, stopwords=None,
+        batch_size=32, max_ram=args.max_ram, max_threads=args.max_threads,
+    ))
+    _write_demo_reports(db_path, dirs["reports"])
+    cmd_stats(argparse.Namespace(db=db_path))
+    logger.info("Demo pipeline complete. Reports written to %s", dirs["reports"])
+
+
 def cmd_nlp(args):
     """NLP enrichment with CKIP (GPU-accelerated, batched)."""
     db = NewsDB(args.db or DB_PATH)
@@ -114,7 +254,7 @@ def cmd_nlp(args):
         if hasattr(nlp, 'load_stopwords'):
             nlp.load_stopwords(args.stopwords)
 
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT article_id, content_clean, title_clean FROM articles "
         "WHERE status='cleaned' AND article_id NOT IN (SELECT article_id FROM nlp_outputs)"
     ).fetchall()
@@ -150,15 +290,16 @@ def cmd_nlp(args):
                 model_version=f"ckip-v1-{rm.get_device()}",
             )
         else:
+            entities = [] if getattr(args, "ner_strategy", "fallback") == "none" else result.entities
             enriched = EnrichedArticle(
                 article_id=aid, url="", title="", content_clean="",
                 source="", publish_date=None, category="", category_name="", tags=[],
                 tokens=result.tokens,
                 pos_tags=result.pos_tags,
-                entities=result.entities,
+                entities=entities,
                 keywords=result.keywords,
                 keyword_summary=", ".join(w for w, _ in result.keywords[:5]),
-                model_version=f"jieba-v1",
+                model_version=f"jieba-v1|ner:{getattr(args, 'ner_strategy', 'fallback')}",
             )
         db.upsert_nlp(enriched)
         processed += 1
@@ -167,13 +308,31 @@ def cmd_nlp(args):
     logger.info(f"NLP enrichment complete: {processed:,} articles")
 
 
+def cmd_entities(args):
+    """Run switchable entity extraction strategy."""
+    database = Database(args.db or DB_PATH)
+    database.init()
+    service = EntityExtractionService(database)
+    result = service.run(
+        provider=args.provider,
+        activate=args.activate,
+        source=args.source,
+        category=args.category,
+        date_from=args.date_from,
+        date_to=args.date_to,
+        limit=args.limit,
+        spacy_model=args.spacy_model,
+    )
+    logger.info(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))
+
+
 def cmd_collocation(args):
     """Collocation analysis."""
     db = NewsDB(args.db or DB_PATH)
     db.connect()
     rm = get_rm(args)
 
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT n.tokens FROM nlp_outputs n "
         "JOIN articles a ON a.article_id = n.article_id WHERE a.status='cleaned'"
     ).fetchall()
@@ -220,7 +379,7 @@ def cmd_text_mining(args):
     db = NewsDB(args.db or DB_PATH)
     db.connect()
 
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT a.article_id, a.publish_date, n.tokens FROM articles a "
         "JOIN nlp_outputs n ON a.article_id = n.article_id WHERE a.status='cleaned'"
     ).fetchall()
@@ -265,7 +424,7 @@ def cmd_cluster(args):
     db = NewsDB(args.db or DB_PATH)
     db.connect()
 
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT a.article_id, n.tokens FROM articles a "
         "JOIN nlp_outputs n ON a.article_id = n.article_id WHERE a.status='cleaned'"
     ).fetchall()
@@ -308,7 +467,7 @@ def cmd_sentiment(args):
     db.connect()
 
     limit = args.limit or 1000
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT article_id, title_clean, content_clean FROM articles "
         "WHERE status='cleaned' LIMIT ?", (limit,)
     ).fetchall()
@@ -346,7 +505,7 @@ def cmd_time_series(args):
     db = NewsDB(args.db or DB_PATH)
     db.connect()
 
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT a.article_id, a.publish_date, n.tokens FROM articles a "
         "JOIN nlp_outputs n ON a.article_id = n.article_id WHERE a.status='cleaned'"
     ).fetchall()
@@ -395,7 +554,7 @@ def cmd_summarize(args):
     db.connect()
 
     doc_id = args.doc_id
-    row = db.db._conn.execute(
+    row = db._conn.execute(
         "SELECT title_clean, content_clean FROM articles WHERE article_id = ?",
         (doc_id,)
     ).fetchone()
@@ -505,7 +664,7 @@ def cmd_run_all(args):
 def cmd_tfidf(args):
     db = NewsDB(args.db or DB_PATH)
     db.connect()
-    rows = db.db._conn.execute(
+    rows = db._conn.execute(
         "SELECT article_id, content_clean FROM articles WHERE status='cleaned'"
     ).fetchall()
     if not rows:
@@ -547,13 +706,32 @@ def main():
     p.add_argument("--batch-size", type=int, default=500)
     p.set_defaults(func=cmd_ingest)
 
+    # demo
+    p = sub.add_parser("demo")
+    p.add_argument("--sample", help="Path to sample JSONL dataset")
+    p.add_argument("--reset", action="store_true", help="Reset demo SQLite database before import")
+    p.set_defaults(func=cmd_demo)
+
     # nlp
     p = sub.add_parser("nlp")
     p.add_argument("--engine", choices=["ckip", "jieba"], default="ckip")
     p.add_argument("--batch-size", type=int, default=64, help="CKIP batch size")
     p.add_argument("--top-k", type=int, default=10)
     p.add_argument("--stopwords")
+    p.add_argument("--ner-strategy", choices=["fallback", "ckip", "spacy", "auto", "none"], default="fallback")
     p.set_defaults(func=cmd_nlp)
+
+    # entity extraction
+    p = sub.add_parser("entities")
+    p.add_argument("--provider", choices=["fallback", "ckip", "spacy", "auto"], default="fallback")
+    p.add_argument("--activate", action="store_true")
+    p.add_argument("--source")
+    p.add_argument("--category")
+    p.add_argument("--date-from")
+    p.add_argument("--date-to")
+    p.add_argument("--limit", type=int, default=500)
+    p.add_argument("--spacy-model")
+    p.set_defaults(func=cmd_entities)
 
     # collocation
     p = sub.add_parser("collocation")

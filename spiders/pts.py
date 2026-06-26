@@ -23,11 +23,6 @@ class PTSSpider(BasePlaywrightSpider):
     custom_settings = {
         "CONCURRENT_REQUESTS_PER_DOMAIN": 8,
         "DOWNLOAD_DELAY": 0.5,
-        "FEEDS": {
-            "/mnt/c/data/information-retrieval/raw/pts_news_%(time)s.jsonl": {
-                "format": "jsonlines", "encoding": "utf-8", "overwrite": False,
-            },
-        },
     }
 
     def __init__(self, start_date: str = None, end_date: str = None,

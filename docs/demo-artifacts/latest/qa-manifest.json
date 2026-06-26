@@ -1,0 +1,507 @@
+{
+  "baseURL": "http://127.0.0.1:3011",
+  "captured_at": "2026-06-26T12:41:40.904Z",
+  "screenshots": [
+    {
+      "route": "dashboard",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-desktop-01.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-desktop-02.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "desktop",
+      "scroll_y": 520,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-desktop-03.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-mobile-01.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-mobile-02.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-mobile-03.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-mobile-04.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "mobile",
+      "scroll_y": 2768,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-mobile-05.png"
+    },
+    {
+      "route": "dashboard",
+      "viewport": "mobile",
+      "scroll_y": 2465,
+      "file": "docs/demo-artifacts/latest/screenshots/dashboard-mobile-06.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-desktop-01.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-desktop-02.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "desktop",
+      "scroll_y": 440,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-desktop-03.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-mobile-01.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-mobile-02.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-mobile-03.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-mobile-04.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "mobile",
+      "scroll_y": 2768,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-mobile-05.png"
+    },
+    {
+      "route": "journey",
+      "viewport": "mobile",
+      "scroll_y": 2083,
+      "file": "docs/demo-artifacts/latest/screenshots/journey-mobile-06.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-desktop-01.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-desktop-02.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "desktop",
+      "scroll_y": 1640,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-desktop-03.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "desktop",
+      "scroll_y": 2460,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-desktop-04.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "desktop",
+      "scroll_y": 2242,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-desktop-05.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-01.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-02.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-03.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-04.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 2768,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-05.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 3460,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-06.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 4152,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-07.png"
+    },
+    {
+      "route": "data-quality",
+      "viewport": "mobile",
+      "scroll_y": 4844,
+      "file": "docs/demo-artifacts/latest/screenshots/data-quality-mobile-08.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-desktop-01.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-desktop-02.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "desktop",
+      "scroll_y": 1640,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-desktop-03.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "desktop",
+      "scroll_y": 808,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-desktop-04.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-mobile-01.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-mobile-02.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-mobile-03.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-mobile-04.png"
+    },
+    {
+      "route": "analysis",
+      "viewport": "mobile",
+      "scroll_y": 1724,
+      "file": "docs/demo-artifacts/latest/screenshots/analysis-mobile-05.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-desktop-01.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-desktop-02.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "desktop",
+      "scroll_y": 1640,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-desktop-03.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "desktop",
+      "scroll_y": 2460,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-desktop-04.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "desktop",
+      "scroll_y": 3280,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-desktop-05.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "desktop",
+      "scroll_y": 2310,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-desktop-06.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-01.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-02.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-03.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-04.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 2768,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-05.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 3460,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-06.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 4152,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-07.png"
+    },
+    {
+      "route": "text-mining",
+      "viewport": "mobile",
+      "scroll_y": 4844,
+      "file": "docs/demo-artifacts/latest/screenshots/text-mining-mobile-08.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-desktop-01.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-desktop-02.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "desktop",
+      "scroll_y": 4,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-desktop-03.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-mobile-01.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-mobile-02.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-mobile-03.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-mobile-04.png"
+    },
+    {
+      "route": "articles",
+      "viewport": "mobile",
+      "scroll_y": 1270,
+      "file": "docs/demo-artifacts/latest/screenshots/articles-mobile-05.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-desktop-01.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-desktop-02.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "desktop",
+      "scroll_y": 296,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-desktop-03.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-mobile-01.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-mobile-02.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-mobile-03.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-mobile-04.png"
+    },
+    {
+      "route": "ml",
+      "viewport": "mobile",
+      "scroll_y": 1450,
+      "file": "docs/demo-artifacts/latest/screenshots/ml-mobile-05.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-desktop-01.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-desktop-02.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "desktop",
+      "scroll_y": 138,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-desktop-03.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-mobile-01.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-mobile-02.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "mobile",
+      "scroll_y": 1384,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-mobile-03.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "mobile",
+      "scroll_y": 2076,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-mobile-04.png"
+    },
+    {
+      "route": "jobs",
+      "viewport": "mobile",
+      "scroll_y": 1361,
+      "file": "docs/demo-artifacts/latest/screenshots/jobs-mobile-05.png"
+    },
+    {
+      "route": "reports",
+      "viewport": "desktop",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/reports-desktop-01.png"
+    },
+    {
+      "route": "reports",
+      "viewport": "desktop",
+      "scroll_y": 820,
+      "file": "docs/demo-artifacts/latest/screenshots/reports-desktop-02.png"
+    },
+    {
+      "route": "reports",
+      "viewport": "mobile",
+      "scroll_y": 0,
+      "file": "docs/demo-artifacts/latest/screenshots/reports-mobile-01.png"
+    },
+    {
+      "route": "reports",
+      "viewport": "mobile",
+      "scroll_y": 692,
+      "file": "docs/demo-artifacts/latest/screenshots/reports-mobile-02.png"
+    },
+    {
+      "route": "reports",
+      "viewport": "mobile",
+      "scroll_y": 512,
+      "file": "docs/demo-artifacts/latest/screenshots/reports-mobile-03.png"
+    }
+  ],
+  "videos": [
+    "docs/demo-artifacts/latest/videos/guided-tour.webm"
+  ]
+}

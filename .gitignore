@@ -5,3 +5,12 @@ __pycache__/
 venv/
 node_modules/
 .DS_Store
+data/
+frontend/.next/
+frontend/out/
+frontend/coverage/
+frontend/test-results/
+frontend/tsconfig.tsbuildinfo
+coverage/
+dist/
+artifacts-phase19-*.png

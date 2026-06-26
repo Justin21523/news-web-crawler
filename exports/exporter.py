@@ -10,9 +10,9 @@ Supports:
 Usage:
     from exports.exporter import Exporter
 
-    exp = Exporter(db_path="/mnt/c/data/information-retrieval/news.db")
-    exp.to_csv("/mnt/c/data/information-retrieval/processed/export.csv")
-    exp.to_parquet("/mnt/c/data/information-retrieval/processed/export.parquet")
+    exp = Exporter(db_path="data/news.db")
+    exp.to_csv("data/processed/export.csv")
+    exp.to_parquet("data/processed/export.parquet")
 """
 
 from __future__ import annotations
@@ -34,24 +34,40 @@ class Exporter:
         self.db = NewsDB(db_path)
         self.db.connect()
 
-    def _get_query(self, status: str = "cleaned", include_nlp: bool = False) -> str:
+    def _status_values(self, status: str) -> tuple[str, ...]:
+        # 明確定義 pipeline 狀態集合，避免用字串大小比較狀態。
+        if status == "raw":
+            return ("raw", "cleaned", "enriched")
+        if status == "enriched":
+            return ("enriched",)
+        return ("cleaned", "enriched")
+
+    def _get_query(self, status: str = "cleaned", include_nlp: bool = False) -> tuple[str, tuple[str, ...]]:
+        statuses = self._status_values(status)
+        placeholders = ",".join("?" for _ in statuses)
         if include_nlp:
-            return """
+            return f"""
                 SELECT a.*, n.tokens, n.pos_tags, n.entities, n.keywords,
                        n.keyword_summary, n.model_version
                 FROM articles a
                 LEFT JOIN nlp_outputs n ON a.article_id = n.article_id
-                WHERE a.status >= ?
-            """
-        return "SELECT * FROM articles WHERE status >= ?"
+                WHERE a.status IN ({placeholders})
+            """, statuses
+        return f"SELECT * FROM articles WHERE status IN ({placeholders})", statuses
+
+    def _ensure_parent(self, path: str | Path) -> Path:
+        output = Path(path)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        return output
 
     # ------------------------------------------------------------------
     def to_csv(self, path: str | Path, status: str = "cleaned",
                include_nlp: bool = False):
         """Export to CSV."""
         import pandas as pd
-        query = self._get_query(status, include_nlp)
-        df = pd.read_sql_query(query, self.db._conn, params=(status,))
+        path = self._ensure_parent(path)
+        query, params = self._get_query(status, include_nlp)
+        df = pd.read_sql_query(query, self.db._conn, params=params)
         df.to_csv(path, index=False, encoding="utf-8")
         logger.info(f"Exported {len(df)} rows to {path}")
 
@@ -59,17 +75,19 @@ class Exporter:
                    include_nlp: bool = False):
         """Export to Parquet."""
         import pandas as pd
-        query = self._get_query(status, include_nlp)
-        df = pd.read_sql_query(query, self.db._conn, params=(status,))
+        path = self._ensure_parent(path)
+        query, params = self._get_query(status, include_nlp)
+        df = pd.read_sql_query(query, self.db._conn, params=params)
         df.to_parquet(path, index=False, engine="pyarrow")
         logger.info(f"Exported {len(df)} rows to {path}")
 
     def to_jsonl(self, path: str | Path, status: str = "cleaned",
                  include_nlp: bool = False):
         """Export to JSONL."""
-        query = self._get_query(status, include_nlp)
+        path = self._ensure_parent(path)
+        query, params = self._get_query(status, include_nlp)
         conn = self.db._conn
-        rows = conn.execute(query, (status,)).fetchall()
+        rows = conn.execute(query, params).fetchall()
 
         count = 0
         with open(path, "w", encoding="utf-8") as f:
@@ -87,9 +105,9 @@ class Exporter:
         except ImportError:
             raise ImportError("pip install datasets to use to_huggingface()")
 
-        query = self._get_query(status, include_nlp)
+        query, params = self._get_query(status, include_nlp)
         conn = self.db._conn
-        rows = conn.execute(query, (status,)).fetchall()
+        rows = conn.execute(query, params).fetchall()
         data = [dict(r) for r in rows]
 
         ds = Dataset.from_list(data)

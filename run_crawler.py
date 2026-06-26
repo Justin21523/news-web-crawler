@@ -10,6 +10,7 @@ Usage:
 """
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -21,15 +22,19 @@ SPIDER_MAP = {
     "ltn": "spiders/ltn.py",
 }
 
-DATA_DIR = "/mnt/c/data/information-retrieval"
+DATA_DIR = os.getenv("NEWS_DATA_DIR", "data")
 SETTINGS = "configs.settings"
 
 
 def run_spider(name: str, extra_args: list[str] | None = None):
+    raw_dir = Path(DATA_DIR) / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    output_path = raw_dir / f"{name}_news_%(time)s.jsonl"
     cmd = [
         "scrapy", "runspider",
         SPIDER_MAP[name],
         "-s", SETTINGS,
+        "-O", str(output_path),
     ]
     if extra_args:
         cmd.extend(extra_args)

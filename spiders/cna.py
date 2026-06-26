@@ -38,11 +38,6 @@ class CNASpider(BasePlaywrightSpider):
         "AUTOTHROTTLE_ENABLED": True,
         "AUTOTHROTTLE_START_DELAY": 3,
         "AUTOTHROTTLE_MAX_DELAY": 15,
-        "FEEDS": {
-            "/mnt/c/data/information-retrieval/raw/cna_news_%(time)s.jsonl": {
-                "format": "jsonlines", "encoding": "utf-8", "overwrite": False,
-            },
-        },
     }
 
     def __init__(self, start_date: str = None, end_date: str = None,

@@ -10,7 +10,7 @@ Provides:
 Usage:
     from pipeline.db import NewsDB
 
-    db = NewsDB("/mnt/c/data/information-retrieval/news.db")
+    db = NewsDB("data/news.db")
     db.init()
     db.insert_raw_articles(jsonl_path)
     results = db.search("人工智慧", limit=20)
@@ -37,7 +37,7 @@ from pipeline.validator import compute_dedup_hash, validate_raw
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_DB_PATH = "/mnt/c/data/information-retrieval/news.db"
+DEFAULT_DB_PATH = "data/news.db"
 
 # ---------------------------------------------------------------------------
 # SQL DDL
@@ -204,13 +204,13 @@ class NewsDB:
             ) VALUES (
                 :article_id, :url, :source, :source_name, :title, :title_clean,
                 :content_clean, :author, :publish_date, :category, :category_name,
-                :tags, :image_url, :crawled_at, 'raw', :dedup_hash, :char_count
+                :tags, :image_url, :crawled_at, 'cleaned', :dedup_hash, :char_count
             )
             ON CONFLICT(article_id) DO UPDATE SET
                 title=excluded.title,
                 content_clean=excluded.content_clean,
                 title_clean=excluded.title_clean,
-                status='raw'
+                status='cleaned'
         """, [
             {
                 **a.to_dict(),
@@ -316,7 +316,7 @@ class NewsDB:
                 "SELECT source, COUNT(*) as cnt FROM articles GROUP BY source"
             ).fetchall()},
             "date_range": conn.execute(
-                "SELECT MIN(publish_date), MAX(publish_date) FROM articles WHERE publish_date IS NOT NULL"
+                "SELECT MIN(publish_date), MAX(publish_date) FROM articles WHERE publish_date IS NOT NULL AND trim(publish_date) != ''"
             ).fetchone(),
         }
 

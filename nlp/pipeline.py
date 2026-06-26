@@ -127,7 +127,7 @@ class NLPPipeline:
             return results
         elif self.engine == "jieba" and JIEBA_AVAILABLE:
             import jieba.posseg as pseg
-            return [(w.flag, w.word) for w in pseg.lcut(text)
+            return [(w.word, w.flag) for w in pseg.lcut(text)
                     if w.word.strip() and w.word not in self.stopwords and w.flag != "x"]
         return []
 
@@ -139,7 +139,36 @@ class NLPPipeline:
             ner = self._ckip_ner([text])
             if ner and ner[0]:
                 return [(e["word"], e["type"]) for e in ner[0]]
-        return []
+        return self._fallback_entities(text)
+
+    def _fallback_entities(self, text: str) -> list[tuple[str, str]]:
+        """沒有 CKIP NER 時，提供輕量候選實體。"""
+        suffix_rules = [
+            (("公司", "集團", "銀行", "醫院", "大學", "政府", "部", "局", "署", "委員會", "協會", "中心", "研究院"), "ORG"),
+            (("市", "縣", "區", "鎮", "鄉", "國", "州", "台灣", "臺灣", "日本", "美國", "中國", "韓國"), "LOCATION"),
+        ]
+        output: list[tuple[str, str]] = []
+        for suffixes, label in suffix_rules:
+            for suffix in suffixes:
+                for match in re.findall(rf"[\u4e00-\u9fffA-Za-z0-9]{{2,12}}{re.escape(suffix)}", text):
+                    if self._valid_entity_candidate(match):
+                        output.append((match, label))
+        for hint in ("表示", "指出", "說", "強調", "認為", "宣布"):
+            for match in re.findall(rf"([\u4e00-\u9fff]{{2,4}}){re.escape(hint)}", text):
+                if self._valid_entity_candidate(match):
+                    output.append((match, "PERSON_CANDIDATE"))
+        seen: set[tuple[str, str]] = set()
+        deduped: list[tuple[str, str]] = []
+        for item in output:
+            if item in seen:
+                continue
+            seen.add(item)
+            deduped.append(item)
+        return deduped[:12]
+
+    def _valid_entity_candidate(self, value: str) -> bool:
+        value = value.strip()
+        return len(value) >= 2 and not value.isdigit() and value not in {"新聞", "資料", "分析", "系統", "平台", "報導"}
 
     # ------------------------------------------------------------------
     # Keyword extraction

@@ -191,6 +191,8 @@ class TestOpinionLexicon:
     @pytest.fixture
     def lex(self):
         from analysis.opinion_lexicon import OpinionLexicon
+        if not Path(self.LEXICON_PATH).exists():
+            pytest.skip(f"Opinion lexicon file not found: {self.LEXICON_PATH}")
         return OpinionLexicon(self.LEXICON_PATH)
 
     def test_load(self, lex):

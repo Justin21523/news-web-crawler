@@ -46,11 +46,12 @@ from analysis.opinion_lexicon import OpinionLexicon
 from utils.resource_manager import ResourceManager
 
 # Paths
-DB_PATH = "/mnt/c/data/information-retrieval/news.db"
-LEXICON_PATH = "/mnt/c/data/features/opinion_word.xlsx"
-PROCESSED_DIR = "/mnt/c/data/information-retrieval/processed"
-REPORTS_DIR = "/mnt/c/data/information-retrieval/reports"
-MODELS_DIR = "/mnt/c/data/information-retrieval/models"
+DATA_DIR = os.getenv("NEWS_DATA_DIR", "/mnt/c/data/information-retrieval")
+DB_PATH = os.getenv("NEWS_DB_PATH", f"{DATA_DIR}/news.db")
+LEXICON_PATH = os.getenv("NEWS_LEXICON_PATH", "/mnt/c/data/features/opinion_word.xlsx")
+PROCESSED_DIR = os.getenv("NEWS_PROCESSED_DIR", f"{DATA_DIR}/processed")
+REPORTS_DIR = os.getenv("NEWS_REPORTS_DIR", f"{DATA_DIR}/reports")
+MODELS_DIR = os.getenv("NEWS_MODELS_DIR", f"{DATA_DIR}/models")
 REPORTS_DIR = Path(REPORTS_DIR)
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -252,8 +253,6 @@ def run_clustering(db: NewsDB, rm: ResourceManager, n_clusters: int = 8) -> dict
 # ===========================================================================
 def run_sentiment(db: NewsDB, rm: ResourceManager, limit: int = 10000) -> dict:
     logger.info("Sentiment analysis...")
-    lex = OpinionLexicon(LEXICON_PATH)
-
     rows = db._conn.execute(
         "SELECT a.article_id, a.title_clean, a.content_clean, n.tokens "
         "FROM articles a LEFT JOIN nlp_outputs n ON a.article_id = n.article_id "
@@ -274,29 +273,39 @@ def run_sentiment(db: NewsDB, rm: ResourceManager, limit: int = 10000) -> dict:
             tokens = []
         token_lists.append(tokens if tokens else [])
 
-    # Method 1: Opinion Lexicon — use raw text matching (works without NLP)
-    logger.info(f"Analyzing {len(texts):,} articles with opinion lexicon (longest-match)...")
-    lex_scores = lex.analyze_texts(texts)
-    lex_summary = lex.summary(lex_scores)
-
-    # If we have CKIP tokens, also run tokenized analysis for comparison
-    has_tokens = any(len(t) > 0 for t in token_lists)
-    if has_tokens:
-        logger.info("CKIP tokens available — running tokenized analysis too...")
-        lex_scores_tok = lex.analyze_tokenized(token_lists, texts=texts)
-        lex_summary_tok = lex.summary(lex_scores_tok)
-        logger.info(f"Tokenized summary: {lex_summary_tok}")
-
-    # Method 2: Simple lexicon
+    # Method 1: Simple lexicon, always available.
     sa = SentimentAnalyzer()
     simple_scores = sa.analyze(texts[:min(limit, 5000)])
+    simple_summary = {
+        "positive": sum(1 for s in simple_scores if s.label == "positive"),
+        "negative": sum(1 for s in simple_scores if s.label == "negative"),
+        "neutral": sum(1 for s in simple_scores if s.label == "neutral"),
+    }
+
+    # Method 2: Opinion Lexicon, optional external resource.
+    lex_scores = []
+    lex_summary = {"total_docs": len(texts), "mean_score": 0, "labels": simple_summary}
+    lex_available = Path(LEXICON_PATH).exists()
+    if lex_available:
+        lex = OpinionLexicon(LEXICON_PATH)
+        logger.info(f"Analyzing {len(texts):,} articles with opinion lexicon (longest-match)...")
+        lex_scores = lex.analyze_texts(texts)
+        lex_summary = lex.summary(lex_scores)
+
+        has_tokens = any(len(t) > 0 for t in token_lists)
+        if has_tokens:
+            logger.info("CKIP tokens available — running tokenized analysis too...")
+            lex_scores_tok = lex.analyze_tokenized(token_lists, texts=texts)
+            lex_summary_tok = lex.summary(lex_scores_tok)
+            logger.info(f"Tokenized summary: {lex_summary_tok}")
+    else:
+        logger.warning(f"Opinion lexicon not found: {LEXICON_PATH}; using simple lexicon only.")
 
     report = {
         "opinion_lexicon_weighted": lex_summary,
         "simple_lexicon": {
-            "positive": sum(1 for s in simple_scores if s.label == "positive"),
-            "negative": sum(1 for s in simple_scores if s.label == "negative"),
-            "neutral": sum(1 for s in simple_scores if s.label == "neutral"),
+            **simple_summary,
+            "method": "simple_lexicon",
         },
         "comparison": {
             "weighted_mean": lex_summary.get("mean_score", 0),
@@ -305,17 +314,19 @@ def run_sentiment(db: NewsDB, rm: ResourceManager, limit: int = 10000) -> dict:
             "simple_positive_pct": sum(1 for s in simple_scores if s.label == "positive") /
                                    max(len(simple_scores), 1) * 100,
             "agreement_rate": sum(1 for ls, ss in zip(lex_scores[:len(simple_scores)], simple_scores)
-                                 if ls.label == ss.label) / max(len(simple_scores), 1) * 100,
+                                 if ls.label == ss.label) / max(len(simple_scores), 1) * 100 if lex_scores else 0,
         },
+        "method": "opinion_lexicon" if lex_available else "simple_lexicon_fallback",
     }
 
     # Export
-    lex_df = lex.to_dataframe(lex_scores)
-    lex_df.to_csv(REPORTS_DIR / "sentiment_scores.csv", index=False, encoding="utf-8")
+    if lex_scores and lex_available:
+        lex_df = lex.to_dataframe(lex_scores)
+        lex_df.to_csv(REPORTS_DIR / "sentiment_scores.csv", index=False, encoding="utf-8")
     with open(REPORTS_DIR / "sentiment_report.json", "w") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
 
-    logger.info(f"Sentiment: {lex_summary['labels']}")
+    logger.info(f"Sentiment: {lex_summary.get('labels', simple_summary)}")
     logger.info(f"Agreement: {report['comparison']['agreement_rate']:.1f}%")
     return report
 
@@ -352,7 +363,7 @@ def run_time_series(db: NewsDB, rm: ResourceManager) -> dict:
     for t in trends[:5]:
         bursts = analyzer.detect_bursts(t.keyword, z_threshold=1.5)
         burst_report.append({
-            "keyword": t.keyword, "trend": t.direction, "slope": getattr(t, 'slope', 0),
+            "keyword": t.keyword, "trend": t.trend_direction, "slope": getattr(t, 'slope', 0),
             "bursts": [{"date": b.burst_date, "count": b.burst_count} for b in bursts[:3]],
         })
 

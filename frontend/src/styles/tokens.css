@@ -1,0 +1,116 @@
+:root {
+  color-scheme: dark;
+
+  --color-bg: #07111f;
+  --color-surface: #0b1626;
+  --color-surface-elevated: #101c2e;
+  --color-surface-muted: #16243a;
+  --color-surface-subtle: #0f1b2d;
+  --color-code-bg: #020617;
+  --color-code-text: #dbeafe;
+  --color-border: #22324a;
+  --color-border-strong: #38506f;
+
+  --color-text: #e5edf7;
+  --color-text-secondary: #9fb0c7;
+  --color-muted: #73849c;
+  --color-muted-2: #5d6e86;
+  --color-inverse: #07111f;
+
+  --color-primary: #22d3ee;
+  --color-primary-hover: #67e8f9;
+  --color-primary-active: #a5f3fc;
+  --color-primary-soft: #164e63;
+  --color-primary-soft-2: #0e2f44;
+  --color-secondary: #a78bfa;
+  --color-secondary-soft: #2e235d;
+  --color-accent: #f59e0b;
+  --color-accent-soft: #452a06;
+
+  --semantic-success: #34d399;
+  --semantic-success-soft: #08372d;
+  --semantic-success-border: #0f766e;
+  --semantic-success-text: #a7f3d0;
+  --semantic-warning: #fbbf24;
+  --semantic-warning-soft: #3c2a07;
+  --semantic-warning-border: #b45309;
+  --semantic-warning-text: #fde68a;
+  --semantic-error: #fb7185;
+  --semantic-error-soft: #451323;
+  --semantic-error-border: #be123c;
+  --semantic-error-text: #fecdd3;
+  --semantic-info: #38bdf8;
+  --semantic-info-soft: #082f49;
+  --semantic-info-border: #0369a1;
+  --semantic-info-text: #bae6fd;
+
+  --module-dashboard: #22d3ee;
+  --module-dashboard-soft: #0e2f44;
+  --module-data-quality: #fb7185;
+  --module-data-quality-soft: #451323;
+  --module-analysis: #38bdf8;
+  --module-analysis-soft: #082f49;
+  --module-text-mining: #a78bfa;
+  --module-text-mining-soft: #2e235d;
+  --module-ml: #f472b6;
+  --module-ml-soft: #4a1735;
+  --module-articles: #2dd4bf;
+  --module-articles-soft: #0f3f3a;
+  --module-jobs: #f59e0b;
+  --module-jobs-soft: #452a06;
+  --module-settings: #94a3b8;
+  --module-settings-soft: #1e293b;
+
+  --chart-1: #22d3ee;
+  --chart-2: #a78bfa;
+  --chart-3: #f59e0b;
+  --chart-4: #2dd4bf;
+  --chart-5: #f472b6;
+  --chart-6: #34d399;
+  --chart-7: #60a5fa;
+  --chart-8: #c084fc;
+  --chart-9: #fb7185;
+  --chart-10: #facc15;
+  --chart-grid: #22324a;
+  --chart-bg: #0b1626;
+
+  --font-sans: Lato, Arial, Helvetica, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-card: 0 1px 1px rgb(0 0 0 / 0.35), 0 18px 46px rgb(0 0 0 / 0.18);
+  --shadow-elevated: 0 22px 64px rgb(0 0 0 / 0.32);
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+.chart-cycle-1 { color: var(--chart-1); }
+.chart-cycle-2 { color: var(--chart-2); }
+.chart-cycle-3 { color: var(--chart-3); }
+.chart-cycle-4 { color: var(--chart-4); }
+.chart-cycle-5 { color: var(--chart-5); }
+.chart-cycle-6 { color: var(--chart-6); }
+.chart-cycle-7 { color: var(--chart-7); }
+.chart-cycle-8 { color: var(--chart-8); }
